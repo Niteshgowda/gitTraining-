@@ -1,23 +1,31 @@
 pipeline {
-agent any
-stages {
-  stage('Checkout') {
-    steps {
-// Checkout code from the Git repository
-     sh 'echo checking out'
-   }
-  }
-stage('Build') {
-  steps {
-// Build the Java application (replace with your build commands)
-  sh 'javac -version'
- }
+    agent any
+
+    stages {
+        stage('Create build output') {
+            steps {
+                script {
+                    // Create the output directory
+                    sh 'mkdir -p output'
+
+                    // Write useful content to usefulfile.txt
+                    writeFile file: 'output/usefulfile.txt', text: 'This file is useful, need to archive it.'
+
+                    // Write useless content to uselessfile.md
+                    writeFile file: 'output/uselessfile.md', text: 'This file is useless, no need to archive it.'
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            // Archive the usefulfile.txt for future reference
+            archiveArtifacts artifacts: 'output/usefulfile.txt', fingerprint: true
+
+            // You can clean up the uselessfile.md here if you want
+            // sh 'rm output/uselessfile.md' // Uncomment to delete the file
+        }
+    }
 }
-stage('Deploy') {
-  steps {
-  // Deploy the application (replace with your deployment commands)
-   sh 'echo "Deploying the application"'
-   }
-  }
- }
-}
+
